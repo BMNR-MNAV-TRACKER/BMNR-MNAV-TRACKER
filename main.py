@@ -14,78 +14,77 @@ EIGHT_STOCK_VALUE = 32_000_000
 
 st.set_page_config(page_title="BMNR mNAV Tracker", page_icon="📈", layout="wide")
 
-# --- DATA FETCHING ---
+# --- CUSTOM DESIGN (CSS) ---
+# This makes the metric boxes look more professional
+st.markdown("""
+    <style>
+    [data-testid="stMetricValue"] { font-size: 40px; color: #007BFF; }
+    [data-testid="stMetricLabel"] { font-size: 18px; font-weight: bold; }
+    .main { background-color: #f8f9fa; }
+    </style>
+    """, unsafe_allow_html=True)
+
 @st.cache_data(ttl=30)
 def fetch_prices():
-    # Using a list to fetch all at once is slightly more efficient
-    tickers = ["BMNR", "ETH-USD", "BTC-USD"]
-    data = {}
-    for t in tickers:
-        data[t] = yf.Ticker(t).fast_info.last_price
-    return data["BMNR"], data["ETH-USD"], data["BTC-USD"]
+    bmnr = yf.Ticker("BMNR").fast_info.last_price
+    eth = yf.Ticker("ETH-USD").fast_info.last_price
+    btc = yf.Ticker("BTC-USD").fast_info.last_price
+    return bmnr, eth, btc
 
 try:
-    bmnr_price, eth_price, btc_price = fetch_prices()
+    bmnr_p, eth_p, btc_p = fetch_prices()
 
     # Calculations
-    val_eth = ETH_HELD * eth_price
-    val_btc = BTC_HELD * btc_price
+    val_eth = ETH_HELD * eth_p
+    val_btc = BTC_HELD * btc_p
     total_nav = val_eth + val_btc + CASH + EIGHT_STOCK_VALUE
-    
-    # NEW METRICS
     nav_per_share = total_nav / SHARES
-    market_cap = bmnr_price * SHARES
-    mnav = market_cap / total_nav
+    mnav = (bmnr_p * SHARES) / total_nav
 
-    # --- TOP METRICS BAR ---
-    st.title("Bitmine (BMNR) mNAV Tracker")
+    # --- THE TOP DESIGN (AS REQUESTED) ---
+    st.title("Bitmine (BMNR) Dashboard")
     
-    # Create three clean columns for the header
-    m1, m2, m3 = st.columns(3)
-    
-    # Column 1: NAV per Share
-    m1.metric(label="NAV per Share", value=f"${nav_per_share:.2f}")
-    
-    # Column 2: mNAV Multiple
-    # Helps visualize if BMNR is trading at a premium (>1) or discount (<1)
-    m2.metric(label="mNAV Multiple", value=f"{mnav:.3f}x")
-    
-    # Column 3: Current BMNR Price
-    m3.metric(label="BMNR Market Price", value=f"${bmnr_price:.2f}")
+    # Top Row: Primary Metrics
+    t1, t2, t3 = st.columns(3)
+    with t1:
+        st.metric("NAV per Share", f"${nav_per_share:.2f}")
+    with t2:
+        # We can add a "delta" to show the multiple clearly
+        st.metric("mNAV Multiple", f"{mnav:.3f}x", delta_color="off")
+    with t3:
+        st.metric("BMNR Market Price", f"${bmnr_p:.2f}")
 
     st.divider()
 
-    # --- BODY ---
-    col_left, col_right = st.columns([2, 1])
-
-    with col_left:
+    # --- LOWER DESIGN: ASSET ALLOCATION ---
+    col1, col2 = st.columns([3, 2])
+    
+    with col1:
         st.subheader("Treasury Breakdown")
-        assets = {
-            "Asset": ["Ethereum (ETH)", "Bitcoin (BTC)", "Cash", "Eightco Stake"],
-            "Quantity": [f"{ETH_HELD:,}", f"{BTC_HELD:,}", "-", "-"],
-            "Live Price": [f"${eth_price:,.2f}", f"${btc_price:,.0f}", "-", "-"],
-            "Value": [val_eth, val_btc, CASH, EIGHT_STOCK_VALUE]
-        }
-        df = pd.DataFrame(assets)
-        st.dataframe(
-            df.style.format({"Value": "${:,.0f}"}), 
-            use_container_width=True, 
-            hide_index=True
-        )
+        df = pd.DataFrame({
+            "Asset": ["Ethereum", "Bitcoin", "Cash", "Eightco"],
+            "Amount": [f"{ETH_HELD:,}", f"{BTC_HELD:,}", "-", "-"],
+            "Price": [f"${eth_p:,.2f}", f"${btc_p:,.0f}", "-", "-"],
+            "Total Value": [val_eth, val_btc, CASH, EIGHT_STOCK_VALUE]
+        })
+        st.table(df.style.format({"Total Value": "${:,.0f}"}))
 
-    with col_right:
-        st.subheader("Market Info")
-        st.write(f"**Total NAV:** ${total_nav / 1e9:.2f}B")
-        st.write(f"**Market Cap:** ${market_cap / 1e9:.2f}B")
-        
-        # Time Logic
-        est_tz = pytz.timezone('US/Eastern')
-        est_time = datetime.now(est_tz).strftime('%I:%M:%S %p')
-        st.caption(f"Last Updated: {est_time} EST")
+    with col2:
+        st.subheader("Asset Allocation")
+        # Quick visualization of where the money is
+        chart_data = pd.DataFrame({
+            "Source": ["ETH", "BTC", "Cash", "Other"],
+            "Value": [val_eth, val_btc, CASH, EIGHT_STOCK_VALUE]
+        }).set_index("Source")
+        st.bar_chart(chart_data)
+
+    # Footer
+    est_time = datetime.now(pytz.timezone('US/Eastern')).strftime('%Y-%m-%d %H:%M:%S')
+    st.caption(f"Market data synced via Yahoo Finance at {est_time} EST")
 
 except Exception as e:
-    st.error(f"Error updating prices: {e}")
+    st.error(f"Live Feed Interrupted: {e}")
 
-# --- AUTO-REFRESH ---
+# Auto-refresh logic
 time.sleep(60)
 st.rerun()
