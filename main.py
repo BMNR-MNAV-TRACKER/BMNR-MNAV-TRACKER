@@ -12,79 +12,74 @@ BTC_HELD = 193
 ETH_HELD = 4_066_062  
 EIGHT_STOCK_VALUE = 32_000_000
 
-st.set_page_config(page_title="BMNR mNAV Tracker", page_icon="📈", layout="wide")
+st.set_page_config(page_title="BMNR Tracker", page_icon="📈", layout="wide")
 
-# --- CUSTOM DESIGN (CSS) ---
-# This makes the metric boxes look more professional
+# --- CUSTOM CSS FOR LIGHT BLUE METRICS ---
 st.markdown("""
     <style>
-    [data-testid="stMetricValue"] { font-size: 40px; color: #007BFF; }
-    [data-testid="stMetricLabel"] { font-size: 18px; font-weight: bold; }
-    .main { background-color: #f8f9fa; }
+    /* Target the Metric Labels (the words) */
+    [data-testid="stMetricLabel"] p {
+        color: #ADD8E6 !important;
+        font-size: 1.2rem !important;
+        font-weight: bold !important;
+    }
+    /* Target the Metric Values (the numbers) */
+    [data-testid="stMetricValue"] div {
+        color: #ADD8E6 !important;
+        font-size: 2.5rem !important;
+    }
+    /* Reduce spacing between metrics */
+    [data-testid="column"] {
+        width: fit-content !important;
+        flex: unset !important;
+        padding-right: 40px !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
 @st.cache_data(ttl=30)
 def fetch_prices():
-    bmnr = yf.Ticker("BMNR").fast_info.last_price
-    eth = yf.Ticker("ETH-USD").fast_info.last_price
-    btc = yf.Ticker("BTC-USD").fast_info.last_price
-    return bmnr, eth, btc
+    try:
+        bmnr = yf.Ticker("BMNR").fast_info.last_price
+        eth = yf.Ticker("ETH-USD").fast_info.last_price
+        btc = yf.Ticker("BTC-USD").fast_info.last_price
+        return bmnr, eth, btc
+    except:
+        return 0.0, 0.0, 0.0
 
-try:
-    bmnr_p, eth_p, btc_p = fetch_prices()
+# Fetch Data
+bmnr_p, eth_p, btc_p = fetch_prices()
 
-    # Calculations
-    val_eth = ETH_HELD * eth_p
-    val_btc = BTC_HELD * btc_p
-    total_nav = val_eth + val_btc + CASH + EIGHT_STOCK_VALUE
-    nav_per_share = total_nav / SHARES
-    mnav = (bmnr_p * SHARES) / total_nav
+# Calculations
+val_eth = ETH_HELD * eth_p
+val_btc = BTC_HELD * btc_p
+total_nav = val_eth + val_btc + CASH + EIGHT_STOCK_VALUE
+nav_per_share = total_nav / SHARES
+mnav = (bmnr_p * SHARES) / total_nav
 
-    # --- THE TOP DESIGN (AS REQUESTED) ---
-    st.title("Bitmine (BMNR) Dashboard")
-    
-    # Top Row: Primary Metrics
-    t1, t2, t3 = st.columns(3)
-    with t1:
-        st.metric("NAV per Share", f"${nav_per_share:.2f}")
-    with t2:
-        # We can add a "delta" to show the multiple clearly
-        st.metric("mNAV Multiple", f"{mnav:.3f}x", delta_color="off")
-    with t3:
-        st.metric("BMNR Market Price", f"${bmnr_p:.2f}")
+# --- TOP METRICS ROW ---
+# Using 5 columns but only filling 3 to keep them "close together" on the left
+m1, m2, m3, spacer = st.columns([1, 1, 1, 3])
 
-    st.divider()
+with m1:
+    st.metric("NAV/Share", f"${nav_per_share:.2f}")
+with m2:
+    st.metric("mNAV", f"{mnav:.3f}x")
+with m3:
+    st.metric("BMNR Price", f"${bmnr_p:.2f}")
 
-    # --- LOWER DESIGN: ASSET ALLOCATION ---
-    col1, col2 = st.columns([3, 2])
-    
-    with col1:
-        st.subheader("Treasury Breakdown")
-        df = pd.DataFrame({
-            "Asset": ["Ethereum", "Bitcoin", "Cash", "Eightco"],
-            "Amount": [f"{ETH_HELD:,}", f"{BTC_HELD:,}", "-", "-"],
-            "Price": [f"${eth_p:,.2f}", f"${btc_p:,.0f}", "-", "-"],
-            "Total Value": [val_eth, val_btc, CASH, EIGHT_STOCK_VALUE]
-        })
-        st.table(df.style.format({"Total Value": "${:,.0f}"}))
+st.divider()
 
-    with col2:
-        st.subheader("Asset Allocation")
-        # Quick visualization of where the money is
-        chart_data = pd.DataFrame({
-            "Source": ["ETH", "BTC", "Cash", "Other"],
-            "Value": [val_eth, val_btc, CASH, EIGHT_STOCK_VALUE]
-        }).set_index("Source")
-        st.bar_chart(chart_data)
+# --- TABLE BREAKDOWN ---
+st.subheader("Treasury Breakdown")
+df = pd.DataFrame({
+    "Asset": ["Ethereum", "Bitcoin", "Cash", "Eightco"],
+    "Value": [val_eth, val_btc, CASH, EIGHT_STOCK_VALUE]
+})
 
-    # Footer
-    est_time = datetime.now(pytz.timezone('US/Eastern')).strftime('%Y-%m-%d %H:%M:%S')
-    st.caption(f"Market data synced via Yahoo Finance at {est_time} EST")
+# Display as a clean table
+st.table(df.style.format({"Value": "${:,.0f}"}))
 
-except Exception as e:
-    st.error(f"Live Feed Interrupted: {e}")
-
-# Auto-refresh logic
-time.sleep(60)
-st.rerun()
+# Time sync
+est_time = datetime.now(pytz.timezone('US/Eastern')).strftime('%I:%M:%S %p')
+st.caption(f"Last Updated: {est_time} EST")
