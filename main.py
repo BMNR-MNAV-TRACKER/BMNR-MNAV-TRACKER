@@ -5,7 +5,6 @@ import time
 from datetime import datetime
 import pytz
 
-
 # --- BMNR DATA ---
 SHARES = 431_344_812
 CASH = 1_000_000_000
