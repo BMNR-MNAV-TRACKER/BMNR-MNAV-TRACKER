@@ -4,7 +4,7 @@ import pandas as pd
 import time
 from datetime import datetime
 import pytz
-<button>Click Me</button>
+
 
 # --- BMNR DATA ---
 SHARES = 431_344_812
