@@ -58,10 +58,8 @@ st.divider()
 # --- NARROW TREASURY BREAKDOWN ---
 st.subheader("Treasury Breakdown")
 
-# We use 3 columns to center the table and keep it narrow
-# [0.1, 0.8, 0.1] means the side columns are 10% each and the table is 80%
-# You can change this to [1, 2, 1] for even narrower (50% table)
-col_spacer_l, col_main, col_spacer_r = st.columns([0.05, 0.9, 2]) 
+# Narrowing the layout using columns
+col_spacer_l, col_main, col_spacer_r = st.columns([0.05, 0.9, 1.5]) 
 
 with col_main:
     assets_data = {
@@ -72,17 +70,15 @@ with col_main:
     }
     df = pd.DataFrame(assets_data)
     
-    # st.dataframe with column_config is the most modern way to format
+    # Updated st.dataframe with formatting for commas
     st.dataframe(
         df,
         hide_index=True,
         use_container_width=True,
         column_config={
-            "Total Value": st.column_config.NumberColumn(format="$%d"),
+            "Total Value": st.column_config.NumberColumn(
+                "Total Value",
+                format="$%d",  # This handles the dollar sign and commas automatically in modern Streamlit
+            ),
             "Asset": st.column_config.Column(width="medium"),
-            "Quantity": st.column_config.Column(width="small"),
-        }
-    )
-
-time.sleep(60)
-st.rerun()
+            "Quantity": st.column_config.Column(width="small
