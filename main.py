@@ -6,13 +6,13 @@ from datetime import datetime
 import pytz
 
 # --- BMNR DATA ---
-SHARES = 425_841_924
+SHARES = 431_344_812
 CASH = 1_000_000_000
 BTC_HELD = 193
 ETH_HELD = 4_066_062  
 EIGHT_STOCK_VALUE = 32_000_000
 ETH_STAKED = 342_560  
-ANNUAL_STAKING_APR = 0.034 
+ANNUAL_STAKING_APR = 0.030 
 
 st.set_page_config(page_title="BMNR NAV Tracker", page_icon="📈", layout="wide")
 
