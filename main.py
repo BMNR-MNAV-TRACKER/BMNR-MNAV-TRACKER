@@ -5,14 +5,14 @@ import time
 from datetime import datetime
 import pytz
 
-# --- BMNR DATA ---
-SHARES = 431_344_812
+# --- BMNR DATA (UPDATED FROM EXCEL) ---
+SHARES = 431_344_811.58
 CASH = 1_000_000_000
 BTC_HELD = 193
 ETH_HELD = 4_066_062  
 EIGHT_STOCK_VALUE = 32_000_000
 ETH_STAKED = 342_560  
-ANNUAL_STAKING_APR = 0.030 
+ANNUAL_STAKING_APR = 0.03  
 
 st.set_page_config(page_title="BMNR NAV Tracker", page_icon="📈", layout="wide")
 
@@ -41,26 +41,35 @@ btc_p = fetch_price("BTC-USD")
 if bmnr_p > 0 and eth_p > 0:
     val_eth = ETH_HELD * eth_p
     val_btc = BTC_HELD * btc_p
+    
+    # Core NAV Calculations
     total_nav = val_eth + val_btc + CASH + EIGHT_STOCK_VALUE
     nav_per_share = total_nav / SHARES
     mnav = (bmnr_p * SHARES) / total_nav
     
+    # MNAV Ex-Cash 
+    nav_no_cash = total_nav - CASH
+    mnav_no_cash = (bmnr_p * SHARES) / nav_no_cash if nav_no_cash > 0 else 0
+    
+    # Staking Yield & Share Logic
     total_annual_usd_yield = (ETH_STAKED * ANNUAL_STAKING_APR) * eth_p
     yield_per_share = total_annual_usd_yield / SHARES
+    eth_per_share = ETH_HELD / SHARES
 
     # --- HEADER SECTION ---
     st.title("BMNR mNAV Tracker")
     
-    # TIMESTAMP LINE
     est_time = datetime.now(pytz.timezone('US/Eastern')).strftime('%Y-%m-%d %I:%M:%S %p')
     st.markdown(f'<p class="timestamp">Last Updated: {est_time} EST</p>', unsafe_allow_html=True)
 
-    # METRICS ROW
-    m1, m2, m3, m4 = st.columns(4)
+    # TOP METRICS ROW (Now 6 Columns)
+    m1, m2, m3, m4, m5, m6 = st.columns(6)
     with m1: st.metric("NAV/Share", f"${nav_per_share:,.2f}")
-    with m2: st.metric("mNAV Multiple", f"{mnav:.3f}x")
-    with m3: st.metric("Annual Yield/Share", f"${yield_per_share:,.4f}")
-    with m4: st.metric("BMNR Price", f"${bmnr_p:,.2f}")
+    with m2: st.metric("mNAV (Total)", f"{mnav:.3f}x")
+    with m3: st.metric("mNAV (Ex-Cash)", f"{mnav_no_cash:.3f}x")
+    with m4: st.metric("ETH / Share", f"{eth_per_share:.6f}")
+    with m5: st.metric("Yield/Share", f"${yield_per_share:,.4f}")
+    with m6: st.metric("BMNR Price", f"${bmnr_p:,.2f}")
 
     st.divider()
 
@@ -83,29 +92,22 @@ if bmnr_p > 0 and eth_p > 0:
         hide_index=True,
         use_container_width=True,
         column_config={
-            "Total Quantity": st.column_config.NumberColumn(
-                "Total Quantity",
-                format="%,.0f" 
-            ),
-            "Live Price": st.column_config.NumberColumn(
-                "Live Price",
-                format="$%,.0f" 
-            ),
-            "Staked Amount": st.column_config.NumberColumn(
-                "Staked Amount (ETH)",
-                format="%,.0f"
-            ),
-            "Est. Annual Yield": st.column_config.NumberColumn(
-                "Est. Annual Yield",
-                format="$%,.0f"
-            ),
-            "Total Value": st.column_config.NumberColumn(
-                "Total Value",
-                format="$%,.0f"
-            ),
+            "Total Quantity": st.column_config.NumberColumn("Total Quantity", format="%,.0f"),
+            "Live Price": st.column_config.NumberColumn("Live Price", format="$%,.0f"),
+            "Staked Amount": st.column_config.NumberColumn("Staked Amount (ETH)", format="%,.0f"),
+            "Est. Annual Yield": st.column_config.NumberColumn("Est. Annual Yield", format="$%,.0f"),
+            "Total Value": st.column_config.NumberColumn("Total Value", format="$%,.0f"),
         }
     )
     
+    # Secondary Analytics
+    st.markdown("---")
+    footer_l, footer_r = st.columns(2)
+    with footer_l:
+        st.write(f"**Total Shares Outstanding:** {SHARES:,.0f}")
+    with footer_r:
+        st.write(f"**Percent of ETH Staked:** {(ETH_STAKED/ETH_HELD)*100:.2f}%")
+
     # Auto-refresh logic
     time.sleep(60)
     st.rerun()
