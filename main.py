@@ -75,16 +75,29 @@ if bmnr_p > 0 and eth_p > 0:
         "Total Value": [val_eth, val_btc, CASH, EIGHT_STOCK_VALUE]
     }
 
-    st.dataframe(
-        pd.DataFrame(assets_data),
-        hide_index=True,
-        use_container_width=True,
-        column_config={
-            "Total Value": st.column_config.NumberColumn("Total Value", format="$%d"),
-            "Est. Annual Yield": st.column_config.NumberColumn("Est. Annual Yield", format="$%d"),
-        }
-    )
-else:
+        st.dataframe(
+    pd.DataFrame(assets_data),
+    hide_index=True,
+    use_container_width=True,
+    column_config={
+        # This adds $ and commas (e.g., $1,234,567)
+        "Total Value": st.column_config.NumberColumn(
+            "Total Value", 
+            format="$%d"  # Or use "localized" for comma-only
+        ),
+        # This adds commas and $ to your yield
+        "Est. Annual Yield": st.column_config.NumberColumn(
+            "Est. Annual Yield", 
+            format="$%d"
+        ),
+        # For the Staked Amount (Quantity), we can use localized for commas
+        "Staked Amount": st.column_config.Column(
+            "Staked Amount", 
+            width="medium"
+        )
+    }
+)
+        else:
     st.error("Waiting for Yahoo Finance data... Check your internet or ticker symbols.")
     if st.button("Retry Now"):
         st.rerun()
