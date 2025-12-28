@@ -103,7 +103,8 @@ st.dataframe(
         ),
     }
 )
-    time.sleep(60)
+    
+time.sleep(60)
     st.rerun()
 
 else:
