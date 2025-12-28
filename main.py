@@ -11,7 +11,7 @@ CASH = 1_000_000_000
 BTC_HELD = 193
 ETH_HELD = 4_066_062 
 EIGHT_STOCK_VALUE = 32_000_000
-ETH_STAKED = 342_560  # Updated value
+ETH_STAKED = 342_560  
 ANNUAL_STAKING_APR = 0.03
 
 st.set_page_config(page_title="BMNR NAV Tracker", page_icon="📈", layout="wide")
@@ -48,11 +48,13 @@ if bmnr_p > 0 and eth_p > 0:
     total_annual_usd_yield = (ETH_STAKED * ANNUAL_STAKING_APR) * eth_p
     yield_per_share = total_annual_usd_yield / SHARES
     eth_per_share = ETH_HELD / SHARES
+    
+    # Bottom calculations
+    pct_eth_staked = (ETH_STAKED / ETH_HELD) * 100
 
     # --- HEADER SECTION ---
     st.title("BMNR mNAV Tracker")
     
-    # FIXED LINE 54:
     est_time = datetime.now(pytz.timezone('US/Eastern')).strftime('%Y-%m-%d %I:%M:%S %p')
     st.markdown(f'<p class="timestamp">Last Updated: {est_time} EST</p>', unsafe_allow_html=True)
 
@@ -89,6 +91,14 @@ if bmnr_p > 0 and eth_p > 0:
             "Total Value": st.column_config.NumberColumn("Total Value", format="$%,.0f"),
         }
     )
+
+    # --- FOOTER METRICS (NEW SECTION) ---
+    st.markdown("### Portfolio Statistics")
+    f1, f2 = st.columns(2)
+    with f1:
+        st.metric("Shares Outstanding", f"{SHARES:,.0f}")
+    with f2:
+        st.metric("% of ETH Staked", f"{pct_eth_staked:.2f}%")
     
     # Auto-refresh loop
     time.sleep(60)
