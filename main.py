@@ -53,8 +53,7 @@ if bmnr_p > 0 and eth_p > 0:
     # THE FIXED LINE:
     est_time = datetime.now(pytz.timezone('US/Eastern')).strftime('%Y-%m-%d %I:%M:%S %p')
     st.markdown(f'<p class="timestamp">Last Updated: {est_time} EST</p>', unsafe_allow_html=True)
-
-    m1, m2, m3, m4 = st.columns(4)
+est_time = datetime.now(pytz.timezone('US/Eastern')).strftime('%Y-%m-%d %I:%M:%S %p')    m1, m2, m3, m4 = st.columns(4)
     with m1: st.metric("NAV/Share", f"${nav_per_share:.2f}")
     with m2: st.metric("mNAV Multiple", f"{mnav:.3f}x")
     with m3: st.metric("Annual Yield/Share", f"${yield_per_share:.4f}")
