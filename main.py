@@ -11,7 +11,7 @@ CASH = 1_000_000_000
 BTC_HELD = 193
 ETH_HELD = 4_066_062 
 EIGHT_STOCK_VALUE = 32_000_000
-ETH_STAKED = 154_176
+ETH_STAKED = 342_560
 ANNUAL_STAKING_APR = 0.03
 
 st.set_page_config(page_title="BMNR NAV Tracker", page_icon="📈", layout="wide")
