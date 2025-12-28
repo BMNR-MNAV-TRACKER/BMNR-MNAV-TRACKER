@@ -58,7 +58,7 @@ if bmnr_p > 0 and eth_p > 0:
     st.markdown(f'<p class="timestamp">Last Updated: {est_time} EST</p>', unsafe_allow_html=True)
 
     # TOP METRICS ROW
-    m1, m2, m3, m4, m5, m6 = st.columns(5)
+    m1, m2, m3, m4, m5, = st.columns(5)
     with m1: st.metric("BMNR Price", f"${bmnr_p:,.2f}")    
     with m2: st.metric("NAV/Share", f"${nav_per_share:,.2f}")
     with m3: st.metric("mNAV (Total)", f"{mnav:.3f}x")
