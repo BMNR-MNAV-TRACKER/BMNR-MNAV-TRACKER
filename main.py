@@ -76,19 +76,33 @@ if bmnr_p > 0 and eth_p > 0:
         "Total Value": [val_eth, val_btc, CASH, EIGHT_STOCK_VALUE]
     }
 
-    st.dataframe(
-        pd.DataFrame(assets_data),
-        hide_index=True,
-        use_container_width=True,
-        column_config={
-            "Total Value": st.column_config.NumberColumn("Total Value", format="$%,.0f"),
-            "Est. Annual Yield": st.column_config.NumberColumn("Est. Annual Yield", format="$%,.0f"),
-            "Live Price": st.column_config.NumberColumn("Live Price", format="$%,.2f"),
-            "Total Quantity": st.column_config.NumberColumn("Total Quantity", format="%,.0f"),
-            "Staked Amount": st.column_config.NumberColumn("Staked Amount (ETH)", format="%,.0f"),
-        }
-    )
-
+st.dataframe(
+    df,
+    hide_index=True,
+    use_container_width=True,
+    column_config={
+        "Total Quantity": st.column_config.NumberColumn(
+            "Total Quantity",
+            format="%,.0f" # Commas and 0 decimals
+        ),
+        "Live Price": st.column_config.NumberColumn(
+            "Live Price",
+            format="$%,.0f" # Dollar sign, commas, and 0 decimals
+        ),
+        "Staked Amount (ETH)": st.column_config.NumberColumn(
+            "Staked Amount (ETH)",
+            format="%,.0f"
+        ),
+        "Est. Annual Yield": st.column_config.NumberColumn(
+            "Est. Annual Yield",
+            format="$%,.0f"
+        ),
+        "Total Value": st.column_config.NumberColumn(
+            "Total Value",
+            format="$%,.0f"
+        ),
+    }
+)
     time.sleep(60)
     st.rerun()
 
