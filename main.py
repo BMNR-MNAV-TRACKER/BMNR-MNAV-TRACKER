@@ -14,7 +14,7 @@ EIGHT_STOCK_VALUE = 32_000_000
 
 # Staking Data
 ETH_STAKED = 342_560  # Initial pilot amount (MAVAN scale-up early 2026)
-ANNUAL_STAKING_APR = 0.034  # 3.4% Est. Yield
+ANNUAL_STAKING_APR = 0.030  # 3.0% Est. Yield
 
 st.set_page_config(page_title="BMNR mNAV Tracker", page_icon="📈", layout="wide")
 
