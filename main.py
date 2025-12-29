@@ -5,7 +5,7 @@ import time
 from datetime import datetime
 import pytz
 
-# --- DATA FROM EXCEL & UPDATES ---
+# --- UPDATED DATA ---
 SHARES = 435_666_174
 CASH = 1_000_000_000
 BTC_HELD = 193
@@ -92,7 +92,7 @@ if bmnr_p > 0 and eth_p > 0:
         }
     )
 
-    # --- FOOTER METRICS (NEW SECTION) ---
+    # --- FOOTER METRICS ---
     st.markdown("### Portfolio Statistics")
     f1, f2 = st.columns(2)
     with f1:
